@@ -16,6 +16,7 @@
 @media(max-width:380px){#app{padding-left:14px;padding-right:14px}.filter-scroll{margin:0 -14px;padding-left:14px;padding-right:14px}.recipe-grid{gap:10px}.food-emoji{font-size:53px}.recipe-card-content{padding:10px}.hero{padding:22px 19px}.hero-art{font-size:85px}}
 
 .multi-categories{display:flex;flex-wrap:wrap;gap:7px;margin-top:5px}.category-choice{display:inline-flex;gap:6px;align-items:center;border:1px solid #d6dfd2;border-radius:12px;padding:8px 10px;background:#fff;font-size:12px;font-weight:650}.category-choice input{width:16px;height:16px;accent-color:#254836}
+.shopping-tools{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:9px;margin-top:13px}.plan-shopping-toggle{display:flex;gap:7px;align-items:center;font-size:12px;font-weight:680;color:#345841}.plan-shopping-toggle input{width:17px;height:17px;accent-color:#254836}.shopping-group-title{font-size:12px;font-weight:800;color:#476b50;text-transform:uppercase;letter-spacing:.5px;margin:15px 0 6px}.shopping-group-row{border-bottom:1px solid #edf0e8;padding-bottom:7px}.shopping-group-row .shopping-row{border-bottom:0;padding:8px 0 5px}.shop-category-select{font-size:11px;color:#5f7863;border:1px solid #dce7d7;border-radius:8px;background:#f7faf5;margin:0 0 3px 33px;padding:4px;max-width:165px}.saved-shopping-choice{display:flex;align-items:center;gap:10px;padding:9px 3px;font-size:13px;border-bottom:1px solid #eff1eb}.saved-shopping-choice span{flex:1}.saved-shopping-choice small{color:#708174;margin-left:auto}.list-block .mini-label{font-size:12px;color:#708174;line-height:1.45}
   </style>
 
 </head>
@@ -201,12 +202,16 @@ document.addEventListener('click',e=>{if(e.target.classList.contains('sheet-back
  case 'clear-day':delete state.plan[el.dataset.date];store();ui.modal=null;render();toast('Meal removed');break;
  case 'remove-basket':state.basketRecipes=state.basketRecipes.filter(x=>x.uid!==el.dataset.uid);store();render();break;
  case 'clear-ticks':state.checked={};store();render();toast('Shopping ticks cleared');break;
+ case 'new-shopping-list':startFreshShoppingList();break;
  case 'clear-extras':if(confirm('Remove all manually added shopping items?')){state.extras=[];state.checked={};store();render()}break;
  case 'export':backupExport();break;
  case 'import':document.getElementById('import-file')?.click();break;
  } });
 document.addEventListener('input',e=>{if(e.target.id==='search-recipes'){ui.search=e.target.value;renderLibraryResults()}if(e.target.id==='ingredient-quick-name'){const value=e.target.value.trim().toLowerCase(),unit=document.getElementById('ingredient-quick-unit');if(unit&&!unit.value){let match=(state.ingredientLibrary||[]).find(x=>x.name.toLowerCase()===value);if(!match){for(const r of state.recipes){match=r.ingredients.find(i=>i.name.toLowerCase()===value);if(match)break}}if(match)unit.value=match.unit||''}}});
-document.addEventListener('change',e=>{if(e.target.dataset.action==='toggle-shop'){state.checked[e.target.dataset.key]=e.target.checked;store();render()}if(e.target.id==='recipe-photo')photoInput(e.target.files?.[0]);if(e.target.id==='import-file')backupImport(e.target.files?.[0])});
+document.addEventListener('change',e=>{if(e.target.dataset.action==='toggle-shop'){state.checked[e.target.dataset.key]=e.target.checked;store();render()}if(e.target.dataset.action==='include-plan'){state.includePlanInShopping=e.target.checked;store();render()}
+ if(e.target.dataset.action==='set-shop-category'){const key=e.target.dataset.key,category=e.target.value;if(SHOP_CATEGORIES.includes(category)){state.shoppingCategories??={};state.shoppingCategories[key]=category;const item=(state.shoppingHistory||[]).find(i=>i.key===key);if(item)item.category=category;store();render()}}
+ if(e.target.dataset.action==='reuse-shop'){const key=e.target.dataset.key,item=(state.shoppingHistory||[]).find(i=>i.key===key);if(item){const extras=state.extras||[];if(e.target.checked){if(!shoppingData().some(i=>i.key===key))extras.push({id:uid(),name:item.name,qty:item.qty??null,unit:item.unit||''})}else{state.extras=extras.filter(i=>String(i.name||'').toLowerCase()+'__'+String(i.unit||'').toLowerCase()!==key)}store();render()}}
+ if(e.target.id==='recipe-photo')photoInput(e.target.files?.[0]);if(e.target.id==='import-file')backupImport(e.target.files?.[0])});
 document.addEventListener('submit',e=>{if(e.target.id==='recipe-form'){e.preventDefault();saveForm(e.target)}if(e.target.id==='add-item-form'){e.preventDefault();const field=e.target.querySelector('input[name=item]');const name=field.value.trim();if(!name)return;state.extras.push({id:uid(),name,qty:null,unit:''});store();render();toast('Added to shopping list')}});
 render();
 
