@@ -30,7 +30,7 @@
 const STORE_KEY='my-kitchen-data-v1';
 const EMOJI=['🥘','🍜','🍝','🍲','🥔','🍛','🥗','🍞','🍕','🥧','🍳','🥙'];
 const CATEGORIES=['Dinner','Lunch','Breakfast','Side','Baking','Snack','Other','Freezer friendly','Quick','Vegetarian','High protein','Batch cook','One pot'];
-function recipeCategories(r){const chosen=Array.isArray(r.categories)&&r.categories.length?r.categories:[r.category||'Other'];return [...new Set([...chosen,...(r.tags||[]).filter(t=>CATEGORIES.includes(t))])].filter(c=>CATEGORIES.includes(c))}
+function recipeCategories(r){const chosen=Array.isArray(r.categories)&&r.categories.length?r.categories:[r.category||'Other',...(r.tags||[]).filter(t=>CATEGORIES.includes(t))];return [...new Set(chosen)].filter(c=>CATEGORIES.includes(c))}
 const PALETTES=['terra','green','gold','pink','blue','purple'];
 const SHOP_CATEGORIES=['Fruit & veg','Meat & fish','Dairy & eggs','Bakery & grains','Tins & jars','Herbs & spices','Frozen','Household','Other'];
 const STARTERS=[
